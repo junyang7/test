@@ -29,7 +29,7 @@ jobs:
         run: yarn make
 
       - name: 📤 Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: electron-app-${{ matrix.os }}
           path: out/make/*
