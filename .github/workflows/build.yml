@@ -1,0 +1,42 @@
+name: Build Electron App
+
+on:
+  push:
+    tags:
+      - "v*"  # 当你推送 "v1.0.0" 这样的 tag 时触发
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: 🚀 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 📦 Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📥 Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: 🔨 Build and Package Electron App
+        run: yarn make
+
+      - name: 📤 Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: electron-app-${{ matrix.os }}
+          path: out/make/*
+
+      - name: 🚀 Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: out/make/*
+          token: ${{ secrets.GITHUB_TOKEN }}
